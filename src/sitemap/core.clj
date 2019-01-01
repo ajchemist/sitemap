@@ -7,6 +7,7 @@
    [sitemap.validator :as v]
    )
   (:import
+   java.util.zip.GZIPInputStream
    java.util.zip.GZIPOutputStream
    ))
 
@@ -54,6 +55,15 @@
     (.write w s)))
 
 
+(defn gzipped?
+  [path]
+  (try
+    (.close (GZIPInputStream. (jio/input-stream path)))
+    true
+    (catch java.util.zip.ZipException _ false)
+    (finally)))
+
+
 ;;
 
 
@@ -73,7 +83,10 @@
 (defn urlset
   [entries]
   [:urlset
-   {:xmlns "http://www.sitemaps.org/schemas/sitemap/0.9"}
+   {:xmlns              "http://www.sitemaps.org/schemas/sitemap/0.9"
+    ;; :xmlns:xsi          "http://www.w3.org/2001/XMLSchema-instance"
+    ;; :xsi:schemaLocation "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
+    }
    (map url-entry entries)])
 
 
@@ -138,7 +151,7 @@
   ([root-uri basename url-entries
     {:keys [output-path-resolver gzip?]
      :or   {output-path-resolver default-output-path-resolver
-            gzip?                true}
+            gzip?                false}
      :as   opts}]
    (let [spit-fn (or (:spit-fn opts) (if gzip? spit-gzipped spit-utf8))]
      (binding [*extension* (if gzip? (str *extension* ".gz") *extension*)]
@@ -180,10 +193,17 @@
    against the sitemaps.org schema and return a list of validation errors.
    If the Sitemap is valid then the list will be empty. If the XML is
    structurally invalid then throws SAXParseException."
-  [{:keys [:siteindex :sitemaps]}]
+  [{:keys [:siteindex :sitemaps] :as sitemap-record}]
   (let [errors (transient [])]
     (when siteindex
-      (reduce conj! errors (v/validate-siteindex siteindex)))
+      (let [in (jio/file siteindex)
+            in (if (gzipped? in) (GZIPInputStream. in) in)]
+        (reduce conj! errors (v/validate-siteindex in))))
     (when-not (empty? sitemaps)
-      (run! #(reduce conj! errors (v/validate-sitemap %)) sitemaps))
+      (run!
+        (fn [sitemap]
+          (let [in (jio/file sitemap)
+                in (if (gzipped? in) (GZIPInputStream. in) in)]
+            (reduce conj! errors (v/validate-sitemap in))))
+        sitemaps))
     (persistent! errors)))

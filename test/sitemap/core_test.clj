@@ -64,20 +64,11 @@
 (deftest chunk-test
   (testing ""
     (is
-      (zero?
+      (empty?
         (-> (render-sitemap-and-save*
               "http://example.com"
               "target/chunk-test/sitemap"
               (map
                 (fn [i] {:loc (str "http://example.com/" i)})
                 (range 0 1e5)))
-          (update :siteindex
-            (fn [siteindex]
-              (when siteindex
-                (GZIPInputStream. (jio/input-stream siteindex)))))
-          (update :sitemaps
-            (fn [sitemaps]
-              (when-not (empty? sitemaps)
-                (map #(GZIPInputStream. (jio/input-stream %)) sitemaps))))
-          (validate-sitemap)
-          (count))))))
+          (validate-sitemap))))))
