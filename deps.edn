@@ -1,0 +1,31 @@
+{:paths ["resources" "src"]
+ :deps
+ {
+  rum {:mvn/version "0.11.3"}
+  }
+ :aliases
+ {
+  :provided
+  {}
+
+
+  :test
+  {
+   :extra-paths ["test-resources" "test"]
+   :extra-deps
+   {
+    hiccup {:mvn/version "1.0.5"}
+
+
+    ;;
+    com.cognitect/test-runner    {:git/url "https://github.com/cognitect-labs/test-runner.git" :sha "028a6d41ac9ac5d5c405dfc38e4da6b4cc1255d5"}
+    org.apache.maven/maven-model {:mvn/version "3.5.4"}
+    org.clojure/tools.cli        {:mvn/version "0.4.1"}
+    org.clojure/tools.deps.alpha {:mvn/version "0.5.460"}
+    user.tools.deps.alpha        {:git/url "https://github.com/aJchemist/user.tools.deps.alpha.git" :sha "b05b3666c4edcece51b5a9f770eaf1bd51c9d17b"}
+    }}}}
+
+
+;; Local Variables:
+;; cider-preferred-build-tool: clojure-cli
+;; End:
