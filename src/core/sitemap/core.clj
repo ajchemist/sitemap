@@ -47,7 +47,7 @@
 
 
 (defn- spit-gzipped
-  [path s]
+  [path ^String s]
   (with-open [w (-> path
                   (jio/output-stream)
                   (GZIPOutputStream.)
@@ -83,7 +83,7 @@
 (defn urlset
   [entries]
   [:urlset
-   {:xmlns              "http://www.sitemaps.org/schemas/sitemap/0.9"
+   {:xmlns "http://www.sitemaps.org/schemas/sitemap/0.9"
     ;; :xmlns:xsi          "http://www.w3.org/2001/XMLSchema-instance"
     ;; :xsi:schemaLocation "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
     }
@@ -156,21 +156,21 @@
    (let [spit-fn (or (:spit-fn opts) (if gzip? spit-gzipped spit-utf8))]
      (binding [*extension* (if gzip? (str *extension* ".gz") *extension*)]
        (let [sitemap-xmls (render-sitemap* url-entries)
-             index-path   (index-path output-path-resolver basename)]
-         (jio/make-parents (jio/file index-path))
+             i-path   (index-path output-path-resolver basename)]
+         (jio/make-parents (jio/file i-path))
          (if (need-siteindex? url-entries)
            (let [sitemap-paths (map #(chunk-path output-path-resolver basename %) (range (count sitemap-xmls)))
                  remote-paths  (map #(str (right-unslashify root-uri) "/" (.getName (jio/file %))) sitemap-paths)]
-             (spit-fn index-path (render-siteindex remote-paths))
+             (spit-fn i-path (render-siteindex remote-paths))
              (run!
                (fn [[path xml]]
                  (spit-fn (doto (jio/file path) (jio/make-parents)) xml))
-               (map vector sitemap-paths sitemap-xmls))
-             {:siteindex index-path
+               (zipmap sitemap-paths sitemap-xmls))
+             {:siteindex i-path
               :sitemaps  sitemap-paths})
            (do
-             (spit-fn index-path (first sitemap-xmls))
-             {:sitemaps #{index-path}})))))))
+             (spit-fn i-path (first sitemap-xmls))
+             {:sitemaps #{i-path}})))))))
 
 
 (defn render-sitemap-and-save
@@ -183,8 +183,8 @@
 
 
 (defn save-sitemap
-  [f sitemap-xml]
   "Save the sitemap XML to a UTF-8 encoded File."
+  [f sitemap-xml]
   (spit-utf8 f sitemap-xml))
 
 

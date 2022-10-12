@@ -2,6 +2,7 @@
   (:require
    [clojure.test :as test :refer [deftest is are testing]]
    [sitemap.validator :refer :all]
+   [clojure.java.io :as jio]
    )
   (:import
    java.io.File
@@ -10,14 +11,14 @@
 
 
 (defn fixture
-  [fixture-name]
   "Get the XML File representing the test case."
-  (File. (apply str ["test-resources/" fixture-name ".xml"])))
+  [fixture-name]
+  (jio/input-stream (jio/resource (str fixture-name ".xml"))))
 
 
 (defn validate-and-get-error-messages
-  [fixture-name]
   "Validate the XML File and convert the list of Exceptions into Strings."
+  [fixture-name]
   (->>
     (fixture fixture-name)
     (validate-sitemap)

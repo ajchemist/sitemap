@@ -1,0 +1,6 @@
+{
+ :org        ""
+ :repository "ajchemist/sitemap"
+
+ :github.token/pass-name "github.com/tokens/ajchemist"
+ }

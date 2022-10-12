@@ -1,29 +1,39 @@
-{:paths ["resources" "src"]
+{:paths ["src/core" "resources"]
+
+
  :deps
- {
-  rum {:mvn/version "0.11.3"}
-  }
+ {rum/rum {:mvn/version "0.12.10"}}
+
+
  :aliases
- {
-  :provided
+ {:provided
   {}
 
 
   :test
-  {
-   :extra-paths ["test-resources" "test"]
+  {:extra-paths ["src/test"]
    :extra-deps
-   {
-    hiccup {:mvn/version "1.0.5"}
+   {hiccup/hiccup {:mvn/version "1.0.5"}}}
 
 
-    ;;
-    com.cognitect/test-runner    {:git/url "https://github.com/cognitect-labs/test-runner.git" :sha "028a6d41ac9ac5d5c405dfc38e4da6b4cc1255d5"}
-    org.apache.maven/maven-model {:mvn/version "3.5.4"}
-    org.clojure/tools.cli        {:mvn/version "0.4.1"}
-    org.clojure/tools.deps.alpha {:mvn/version "0.5.460"}
-    user.tools.deps.alpha        {:git/url "https://github.com/aJchemist/user.tools.deps.alpha.git" :sha "b05b3666c4edcece51b5a9f770eaf1bd51c9d17b"}
-    }}}}
+  :test-runner
+  {:extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+   :main-opts  ["-m" "cognitect.test-runner" "-d" "src/test"]
+   :exec-fn    cognitect.test-runner.api/test
+   :exec-args  {:dirs     ["src/test"]
+                :excludes [:deprecated]}}
+
+
+  :build
+  {:deps
+   {io.github.clojure/tools.build      {:git/tag "v0.8.3" :git/sha "0d20256"}
+    io.github.ajchemist/user.java.time {:mvn/version "2022.75.23671"}}
+   :ns-default build.package}
+
+
+  :maven-tool
+  {:extra-deps {io.github.ajchemist/user.apache.maven.alpha {:git/sha "4f70a7a6ed4ab0620c7a0a3a4caf95d33ef916c6"}}
+   :ns-default user.apache.maven.api}}}
 
 
 ;; Local Variables:
